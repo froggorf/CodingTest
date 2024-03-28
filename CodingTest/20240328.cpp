@@ -31,7 +31,7 @@ int solution(vector<int> numbers, int target) {
     CalcValue(numbers, 0, 0, target);
 
     int answer = Value;
-    std::cout << answer << std::endl;
+    //std::cout << answer << std::endl;
     return answer;
 }
 
