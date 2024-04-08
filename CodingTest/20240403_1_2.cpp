@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <numeric>
@@ -6,6 +7,7 @@ int main() {
     int k{};
     int n{};
     std::vector<int> cables;
+    std::vector<int> values;
 
     std::cin >> k;
     std::cin >> n;
@@ -14,21 +16,19 @@ int main() {
         int LineLength{};
         std::cin >> LineLength;
         cables.push_back(LineLength);
+        values.push_back(LineLength);
     }
 
-    long left = 1;
-    long right = std::numeric_limits<int>::max();
+    while(true)
+    {
+        auto max_ele = std::max_element(cables.begin(), cables.end());
+        *max_ele = *max_ele / 2;
+        long long value{};
+        for(const auto& cable : cables)
+        {
+            value += cable / *max_ele;
+        }
 
-    long long count, mid;
-
-    while (left <= right) {
-        count = 0;
-        mid = (left + right) / 2;
-        for (int i = 0; i < k; i++) count += cables[i] / mid;
-        if (count < n) right = mid - 1;
-        else left = mid + 1;
     }
-
-    std::cout << right;
     return 0;
 }
