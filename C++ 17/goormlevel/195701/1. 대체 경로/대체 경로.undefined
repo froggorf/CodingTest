@@ -1,0 +1,50 @@
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+	// 1~N번 붙은 N개 M개 도로
+	// 차를 타고 S->E, 최단거리이므로 BFS를 써야함
+	// 근데 공사가 일어남 i일뒤 i번 도시가 공사
+	// 그러면 그 도시에 연결된 모든 도로 사용불가
+	int N, M, S,E;
+	std::cin >> N >> M>>S>>E;
+	std::vector<std::vector<int>> Graph(N+1);
+	for(int i = 0; i < M; ++i){
+		int u, v;
+		std::cin>>u>>v;
+		Graph[u].emplace_back(v);
+		Graph[v].emplace_back(u);
+	}
+
+	// i일에 갈 수 있는 경로가 있는지를 체크
+	// 동시에 이 i 가 공사하는 도시가 될것
+	for(int i = 1; i <= N; ++i){
+		int Answer = -1;
+		// { 현재 마을, 여태까지 거쳐온 마을 수(즉 정답) }
+		std::queue<std::pair<int,int>> Q;
+		Q.emplace(S,1);
+		std::vector<bool> Visited(N,false);
+		while(!Q.empty()){
+			std::pair<int,int> Cur = Q.front(); Q.pop();
+			// 공사로 인해 못지나감
+			if(Cur.first == i){
+				continue;
+			}
+			// 도착한것
+			if(Cur.first == E){
+				Answer = Cur.second;
+				break;
+			}
+
+			Visited[Cur.first] = true;
+			for(int Next : Graph[Cur.first]){
+				if(Visited[Next]){
+					continue;
+				}
+				Q.emplace(Next, Cur.second+1);
+			}
+		}
+		std::cout<<Answer<<"\n";;
+	}
+	return 0;
+}
