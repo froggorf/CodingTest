@@ -1,0 +1,58 @@
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+	// 한 변의 길이가 N
+	// M개의 반직선
+	// 두 반직선이 교차하는 점의 수
+
+	// (행,열)을 정해서
+	// 방향 d를 정함(상하좌우)
+
+	// 그렇다면.. vector에 각 행별로 X1 ~ X2 에 선이 있다는걸 알려주는걸 적어놓고
+	// 그걸 열마다 체크하는 방식으로 하면 될것같음
+	int N,M;
+	std::cin>>N>>M;
+	std::vector<std::vector<int>> Row(N, std::vector<int>(N));
+	std::vector<std::vector<int>> Col(N, std::vector<int>(N));
+	for(int i = 0; i < M; ++i){
+		int StartRow;
+		int StartCol;
+		char Dir;
+		std::cin>>StartRow>>StartCol >> Dir;
+		StartRow -= 1;
+		StartCol -= 1;
+		if(Dir == 'U'){
+			for(int j = StartRow; j>= 0; --j){
+					Col[j][StartCol] += 1;
+				}
+		}
+		else if(Dir == 'D'){
+				for(int j = StartRow; j < N; ++j){
+					Col[j][StartCol] += 1;
+				}
+			
+		}
+		else if(Dir == 'L'){
+				for(int j = StartCol; j >= 0; --j){
+					Row[StartRow][j] += 1;
+				}
+			
+		}
+		else{
+			for(int j = StartCol; j < N; ++j){
+					Row[StartRow][j] += 1;
+				}
+		}
+	}
+	
+
+	long long Answer = 0;
+	for(int x = 0; x < N; ++x){
+		for(int y = 0; y < N; ++y){
+			Answer += static_cast<long long>(Row[x][y]) * static_cast<long long>(Col[x][y]);
+		}
+	}
+	std::cout<<Answer;
+	return 0;
+}
