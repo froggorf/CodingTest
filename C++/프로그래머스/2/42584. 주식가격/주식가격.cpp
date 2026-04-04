@@ -1,27 +1,26 @@
 #include <string>
 #include <vector>
-#include <stack>
+
 using namespace std;
 
 vector<int> solution(vector<int> prices) {
-    vector<int> answer(prices.size(),0);
-    // 뭔가 스택 쓰면 좋아보이는데..
-    std::stack<std::pair<int,int>> S;
-    for(int i = 0; i < prices.size(); ++i)
-    {
-        while(!S.empty() && S.top().second > prices[i])
-        {
-            std::pair<int,int> Top = S.top(); S.pop();
-            answer[Top.first] = i - Top.first;
+    // n == 10000
+    // 100000000 1억이니까 n^2 도 어느정도 가능
+    
+    std::vector<int> Answer(prices.size());
+    
+    for(int i = 0; i < prices.size() - 1; ++i){
+        int Time = 0;
+        for(int j = i + 1; j < prices.size(); ++j){
+            ++Time;
+            if(prices[i] > prices[j]){
+                break;
+            }
         }
-        S.emplace(i, prices[i]);
+        Answer[i] = Time;
     }
+    // 마지막은 무조건 안떨어지니까
     
-    while(!S.empty())
-    {
-        std::pair<int,int> Top = S.top(); S.pop();
-        answer[Top.first] = prices.size() - Top.first - 1;
-    }
+    return Answer;
     
-    return answer;
 }
