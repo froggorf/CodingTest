@@ -1,45 +1,51 @@
 #include <string>
 #include <vector>
-#include <iostream>
 #include <algorithm>
-using namespace std;
 
+using namespace std;
+std::vector<int> Answer;
+void Func(std::string& s){
+    int ZeroCount = 0;
+    for(const char C : s){
+        if(C == '0'){
+            ++ZeroCount;
+        }
+    }
+    Answer.emplace_back(ZeroCount);
+    int Length = s.length() - ZeroCount;  
+    s.clear();
+    s.reserve(100);
+    while(true){
+        if(Length == 0){
+            break;
+        }
+        if(Length & 1){
+            s.push_back('1');
+        }
+        else{
+            s.push_back('0');
+        }
+        Length/=2;
+        
+    }
+    std::reverse(s.begin(),s.end());
+    
+}
 
 
 vector<int> solution(string s) {
-    vector<int> answer(2, 0);
+    // s의 길이는 15만,
+    // 모두다 1이라 할때 
+    // 15만 -> 대략 10번 내외임
+    // 그럼 n * 10 해도 충분하니까 그냥 썡으로 돌리는게 나음
+    
     while(s != "1"){
-        ++answer[0];
-        
-        // 1. 0을 다 지우고
-        size_t OriginLength = s.length();
-        s.erase(std::remove(s.begin(), s.end(), '0'), s.end());
-        size_t CurrentLength = s.length();
-        answer[1] += (OriginLength - CurrentLength);
-        
-        
-        // 2. 길이로 새로 만든다.
-        s.clear();
-        s.reserve(1000);
-        while(CurrentLength > 0){
-            if(CurrentLength & 1){
-                s = '1' + s;
-            }
-            else{
-                s = '0' + s;
-            }
-            CurrentLength = CurrentLength >> 1;
-        }
+        Func(s);
     }
-    
-    // 01110
-    // -> 111 -> 11 (1, 2)
-    // -> 11 -> 10 (2,2)
-    // -> 1 -> 1 (3,3)
-    
-    
-    
-    
-    
-    return answer;
+    std::vector<int> A(2,0);
+    A[0] = Answer.size();
+    for(int i = 0; i < Answer.size(); ++i){
+        A[1] += Answer[i];
+    }
+    return A;
 }
