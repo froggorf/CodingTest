@@ -1,66 +1,47 @@
 #include <iostream>
 #include <vector>
-
-
+#include <queue>
+#include <stack>
 int main() {
-	// N짜리 수열,
-	// 연속된 수의 부분합, 그 합이 S 이상인것중 가장 짧은 길이
-	// 투포인터 쓰면 되지않을까,
-	std::cin.tie(nullptr);
-	std::ios::sync_with_stdio(false);
-
-	long long N, S;
+	// 실수로 봐버렸지만,
+	// 연속된 수들의 부분합중에 S이상이 되는것중 짧은것
+	// 그러면 S를 넘기는순간 ++Left,
+	// S가 안되면 ++Right 를 하면 되지않을까?
+	// 10000을 10만번 더해도 int 최대는 안넘음
+	int N,S;
 	std::cin >> N >> S;
 	std::vector<int> Nums(N);
 	for (int i = 0; i < N; ++i) {
 		std::cin >> Nums[i];
 	}
 
-	int CurrentSum = 0;
 	auto Left = Nums.begin();
-	auto Right = Nums.begin();
-	CurrentSum = *Left;
-	int Answer = INT32_MAX;
+	auto Right = Left;
+	int Value = *Left;
+	int ShortestLength = INT32_MAX;
 	while (true) {
-
-		if (CurrentSum >= S) {
-			int CurrentDistance = std::distance(Left, Right) + 1;
-			if (CurrentDistance < Answer) {
-				Answer = CurrentDistance;
-			}
-
-			if (Left < Right) {
-				// 이제 한칸씩 왼쪽꺼를 뒤로
-				CurrentSum -= *Left;
-				++Left;
-			}
-			else {
-				if (Right + 1 == Nums.end()) {
-					break;
-				}
-				else {
-					++Right;
-				}
-				
-			}
+		// S보다 크면
+		if (Value >= S) {
+			// 기록을 남긴다음에
+			ShortestLength = std::min(static_cast<int>(std::distance(Left, Right)) + 1, ShortestLength);
+			// 왼쪽 한칸 옮기기
+			Value -= *Left;
+			++Left;
 		}
+		// S보다 작으면
 		else {
-			// S를 못넘겼는데 Right가 끝원소를 가리키면 while 나가면 됨
-			if (Right + 1 == Nums.end()) {
+			++Right;
+			if (Right == Nums.end()) {
 				break;
 			}
-			else {
-				++Right;
-				CurrentSum += *Right;
-			}
+			Value += *Right;
 		}
-		
 	}
-
-	if (Answer == INT32_MAX) {
+	if (ShortestLength == INT32_MAX) {
 		std::cout << 0;
 		return 0;
 	}
-	
-	std::cout << Answer;
+	std::cout << ShortestLength;
+
+
 }
