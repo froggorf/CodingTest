@@ -1,71 +1,89 @@
 #include <iostream>
 #include <vector>
 
-std::vector<long long> Nums;
-std::vector<long long> SegmentTree;
+long long Build(const std::vector<long long>& OriginValue,
+	std::vector<long long>& SegmentTree,
+	int Left, int Right, int TargetIndex) {
 
-long long Init(int Node, int Start, int End) {
-	if (Start == End) {
-		return SegmentTree[Node] = Nums[Start];
+	int Mid = (Left + Right) / 2;
+	
+	if (Left == Right) {
+		return SegmentTree[TargetIndex] = OriginValue[Left];
 	}
 
-	int Mid = (Start + End) / 2;
-	return SegmentTree[Node] = Init(Node * 2 + 1, Start, Mid) + Init(Node*2+2, Mid+1,End);
+	long long LeftSum = Build(OriginValue, SegmentTree, Left, Mid, 2 * TargetIndex);
+	long long RightSum = Build(OriginValue, SegmentTree, Mid + 1, Right, 2 * TargetIndex + 1);
+	return SegmentTree[TargetIndex] = LeftSum + RightSum;
 }
 
-void Update(int Node, int Start, int End, int Idx, long long NewValue) {
-	if (Idx < Start || End < Idx) {
-		return;
+long long Update(std::vector<long long>& SegmentTree, int SegmentIndex, int Left, int Right, int TargetIndex, long long NewValue) {
+	// 목적지 리프노드까지 잘 도착한것
+	if (Left == Right) {
+		long long OriginValue = SegmentTree[SegmentIndex];
+		SegmentTree[SegmentIndex] = NewValue;
+		return NewValue - OriginValue;
 	}
 
-	if (Start == End) {
-		SegmentTree[Node] = NewValue;
-		return;
+	int Mid = (Left + Right) / 2;
+	long long Diff{ 0 };
+	if (Left <= TargetIndex && TargetIndex <= Mid) {
+		Diff = Update(SegmentTree, 2 * SegmentIndex, Left, Mid, TargetIndex, NewValue);
+	}
+	else {
+		Diff = Update(SegmentTree, 2 * SegmentIndex + 1, Mid + 1, Right, TargetIndex, NewValue);
 	}
 
-	int Mid = (Start + End) / 2;
-	Update(Node * 2 + 1, Start, Mid, Idx, NewValue);
-	Update(Node * 2 + 2, Mid + 1, End, Idx, NewValue);
-	SegmentTree[Node] = SegmentTree[Node * 2 + 1] + SegmentTree[Node * 2 + 2];
+	SegmentTree[SegmentIndex] += Diff;
+
+	return Diff;
 }
 
-long long Query(int Node, int Start, int End, int Left, int Right) {
-	if (Right < Start || End < Left) {
+long long Query(const std::vector<long long>& SegmentTree, int SegmentIndex, int Left, int Right, int QueryLeft, int QueryRight) {
+	// 쿼리의 가운데 부분이면 그부분만 출력
+	if (QueryLeft <= Left && Right <= QueryRight) {
+		return SegmentTree[SegmentIndex];
+	}
+	if (QueryRight < Left
+		|| Right < QueryLeft) {
 		return 0;
 	}
 
-	if (Left <= Start && End <= Right) {
-		return SegmentTree[Node];
-	}
+	int Mid = (Left + Right) / 2;
+	long long LeftSum = Query(SegmentTree, 2 * SegmentIndex, Left, Mid, QueryLeft, QueryRight);
+	long long RightSum = Query(SegmentTree, 2 * SegmentIndex + 1, Mid + 1, Right, QueryLeft, QueryRight);
+	return LeftSum + RightSum;
 
-	int Mid = (Start + End) / 2;
-	return Query(Node * 2 + 1, Start, Mid, Left, Right) + Query(Node * 2 + 2, Mid + 1, End, Left, Right);
 }
 
 int main() {
-	// 구간합은 DP 나 세그먼트 트리
-	// 자주 바뀌면 세그먼트 트리
-	std::ios::sync_with_stdio(false);
 	std::cin.tie(nullptr);
-
-	long long N, M, K;
+	std::ios::sync_with_stdio(false);
+	int N, M, K;
 	std::cin >> N >> M >> K;
-	Nums = std::vector<long long>(N);
+	std::vector<long long> OriginValue(N);	
 	for (int i = 0; i < N; ++i) {
-		std::cin >> Nums[i];
+		std::cin >> OriginValue[i];
 	}
-	SegmentTree = std::vector<long long>(N * 4);
-	Init(0, 0, N - 1);
+	std::vector<long long> SegmentTree(4 * N);	//총 500만개 == 2000만바이트 == 20MB, OK
+	
+	Build(OriginValue, SegmentTree, 0, N-1, 1);
+	
 	for (int i = 0; i < M + K; ++i) {
-		long long Command, A, B;
-
-		std::cin >> Command >> A >> B;
-		--A;
+		long long Command, First, Second;
+		std::cin >> Command >> First >> Second;
+		First -= 1;
+		// Update
 		if (Command == 1) {
-			Update(0, 0, N - 1, A, B);
+			Update(SegmentTree, 1, 0, N - 1, First, Second);
 		}
-		else {
-			std::cout << Query(0, 0, N - 1, A, B - 1) << "\n";
+		// Query
+		if (Command == 2) {
+			int RangeEnd = (int)Second - 1;
+			long long Answer = Query(SegmentTree, 1, 0, N - 1, First, RangeEnd);
+			std::cout << Answer << "\n";
 		}
 	}
+
+
+
 }
